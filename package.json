@@ -1,0 +1,11 @@
+{
+  "name": "hangman-bot",
+  "version": "1.0.0",
+  "description": "Play Hangman",
+  "main": "bot.js",
+  "author": "rabel#6669",
+  "dependencies": {
+    "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+    "winston": "^3.2.1"
+  }
+}
