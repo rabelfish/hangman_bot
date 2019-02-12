@@ -7,17 +7,20 @@ logger.remove(logger.transports.Console);
 logger.add(new logger.transports.Console, {
   colorize: true
 });
+
 logger.level = 'debug';
 // Initialize Discord Bot
 var bot = new Discord.Client({
   token: auth.token,
   autorun: true
 });
+
 bot.on('ready', function (evt) {
   logger.info('Connected');
   logger.info('Logged in as: ');
   logger.info(bot.username + ' - (' + bot.id + ')');
 });
+
 bot.on('message', async function (user, userID, channelID, message, evt) {
   // Our bot needs to know if it will execute a command
   // It will listen for messages that will start with `!`
@@ -42,7 +45,7 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
         bot.sendMessage({
           to: channelID,
           message: 'Okay <@' + userID + '> Please check your DM\'s to set the word!'
-        });
+        }, deletePrev);
 
         bot.sendMessage({
           to: userID,
@@ -59,13 +62,14 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
       /** GUESS **/
       if (cmd.length == 1 && hangman.get_game_state(channelID) === 0) {
         // guess letter
-        var guesses = hangman.guess(cmd.toUpperCase(), channelID);
+        var serverID = bot.channels[channelID] ? bot.channels[channelID].guild_id : false;
+        var guesses = await hangman.guess(cmd.toUpperCase(), channelID, bot, serverID, userID);
 
         if (guesses == undefined) {
           bot.sendMessage({
             to: channelID,
             message: 'There is currently no game.'
-          });
+          }, deletePrev);
         } else {
 
           var game_state = hangman.get_game_state(channelID);
@@ -82,14 +86,14 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
               message: 'You Won!!' +
                 '\n\n```' + man + ' ```' +
                 '\n\nHere\'s your word:\n```css\n' + hangman.calc_word_state(channelID) + '```'
-            });
+            }, deletePrev);
           } else if (game_state === -1) {
             bot.sendMessage({
               to: channelID,
               message: 'You Lost :(' +
                 '\n\n```' + hangman.get_body_parts(channelID) + ' ```' +
                 '\n\nHere\'s your word:\n```css\n' + hangman.calc_word_state(channelID) + '```'
-            });
+            }, deletePrev);
           } else {
 
             bot.sendMessage({
@@ -98,7 +102,7 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
                 '\n\n```' + hangman.get_body_parts(channelID) + ' ```' +
                 '\n\nHere\'s your word:\n```css\n' + hangman.calc_word_state(channelID) + '```' +
                 '\n\n>You have ' + guesses + ' guesses left. Guess a letter! Example: !E'
-            });
+            }, deletePrev);
           }
         }
       } else {
@@ -106,10 +110,25 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
         switch (cmd) {
           /** HELP **/
           case 'help':
+            var msg = '\n**Commands:**\n\n`!help: show commands`\n`!score: show the leaderboard`\n`!play: start a new game with a random word`\n`!set word: ask the bot to DM you to set a word for a game in this server`\n`!state: show state of the game`\n`!letters: show unguessed letters`\n`![a-zA-Z]: guess this letter`';
+
+            msg += '\n\n You can also DM hangman to play a private game!'
+
             bot.sendMessage({
               to: channelID,
-              message: '\n**Commands:**\n\n`!help: show commands`\n`!play: start a new game`\n`!set word: ask the bot to DM you to set a word for a game in this server`\n`!state: show state of the game`\n`!letters: show unguessed letters`\n`![a-zA-Z]: guess this letter`'
-            });
+              message: msg
+            }, deletePrev);
+            break;
+          /** SCORE */
+          case 'score':
+            // if (channelID == 544606962206113794) {
+            var score = await hangman.get_score(bot, channelID);
+
+            bot.sendMessage({
+              to: channelID,
+              message: score
+            }, deletePrev);
+            // }
             break;
           /** PLAY **/
           case 'play':
@@ -123,7 +142,7 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
                 '\n\n```' + hangman.get_body_parts(channelID) + ' ```' +
                 '\n\nHere\'s your word:\n```\n' + hangman.calc_word_state(channelID) + '```' +
                 '\n\n>You have 10 guesses left. Guess a letter! Example: !E'
-            });
+            }, deletePrev);
             break;
           /** LETTERS **/
           case 'letters':
@@ -134,19 +153,19 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
               bot.sendMessage({
                 to: channelID,
                 message: 'There is currently no game.'
-              });
+              }, deletePrev);
             } else if (state == 2) {
 
               var pending_user = hangman.get_pending_user(channelID);
               bot.sendMessage({
                 to: channelID,
                 message: 'Game is waiting for <@' + pending_user + '> to set a word. You can start a new game without them if you want.'
-              });
+              }, deletePrev);
             } else {
               bot.sendMessage({
                 to: channelID,
                 message: 'Here are the letters you have not guessed: ```' + letters + ' ```'
-              });
+              }, deletePrev);
             }
             break;
           /** STATE **/
@@ -158,7 +177,7 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
               bot.sendMessage({
                 to: channelID,
                 message: 'There is currently no game.'
-              });
+              }, deletePrev);
 
             } else if (state == 2) {
 
@@ -166,7 +185,7 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
               bot.sendMessage({
                 to: channelID,
                 message: 'Game is waiting for <@' + pending_user + '> to set a word. You can start a new game without them if you want.'
-              });
+              }, deletePrev);
 
             } else {
 
@@ -178,7 +197,7 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
                   '\n\n```' + hangman.get_body_parts(channelID) + ' ```' +
                   '\n\nHere\'s your word:\n```\n' + hangman.calc_word_state(channelID) + '```' +
                   '\n\n>You have ' + guesses + ' guesses left. Guess a letter! Example: !E'
-              });
+              }, deletePrev);
             }
             break;
         }
@@ -205,7 +224,26 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
           '\n\n```' + hangman.get_body_parts(pendingID) + ' ```' +
           '\n\nHere\'s your word:\n```\n' + hangman.calc_word_state(pendingID) + '```' +
           '\n\n>You have 10 guesses left. Guess a letter! Example: !E'
-      });
+      }, deletePrev);
     }
   }
 });
+
+var prevMessage = {};
+var deletePrev = (error, response) => {
+  if (error) {
+
+  } else {
+    var channelID = response.channel_id;
+
+    // delete 
+    if (prevMessage[channelID]) {
+      bot.deleteMessage({
+        channelID: channelID,
+        messageID: prevMessage[channelID]
+      });
+    }
+
+    prevMessage[channelID] = response.id;
+  }
+}

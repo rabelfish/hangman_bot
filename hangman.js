@@ -20,6 +20,31 @@ var get_words = async () => {
   game_data.words = await fs.readFileSync(inputFile).toString().split(",");
 };
 
+var add_point = async (bot, serverID, userID) => {
+  var leaderboard = await JSON.parse(fs.readFileSync('leaderboard.json', 'utf8'));
+  var server_scores = leaderboard[serverID];
+
+  if (!server_scores) {
+    server_scores = {};
+    var members = bot.servers[serverID].members;
+
+    for (var key in members) {
+      var nick = members[key].nick
+
+      if (nick !== null) {
+        server_scores[key] = {
+          nick: nick,
+          score: 0
+        }
+      }
+    }
+  }
+  server_scores[userID].score = server_scores[userID].score + 1;
+  leaderboard[serverID] = server_scores;
+  await fs.writeFileSync('leaderboard.json', JSON.stringify(leaderboard), 'utf8');
+  return true;
+};
+
 var public = {
 
   init_word: (word, channelID) => {
@@ -105,7 +130,7 @@ var public = {
     }
   },
 
-  guess: (guessed_letter, channelID) => {
+  guess: async (guessed_letter, channelID, bot, serverID, userID) => {
 
     if (!game_data.games[channelID]) {
       return undefined;
@@ -145,6 +170,7 @@ var public = {
         // check if you lost
         if (game_data.games[channelID].word_state == game_data.games[channelID].word) {
           game_data.games[channelID].game_over = 1;
+          if (serverID) await add_point(bot, serverID, userID);
           console.log("You Won!");
         }
 
@@ -155,6 +181,39 @@ var public = {
     }
 
     return game_data.games[channelID].turns_left;
+  },
+
+  get_score: async (bot, channelID) => {
+    var leaderboard = await JSON.parse(fs.readFileSync('leaderboard.json', 'utf8'));
+    var channel = bot.channels[channelID];
+    if (!channel) return "You are the only one here silly. Of course you are winning."
+    var serverID = channel.guild_id;
+    var server_scores = leaderboard[serverID];
+
+    if (!server_scores) {
+      server_scores = {};
+      var members = bot.servers[serverID].members;
+      console.log(members);
+      for (var key in members) {
+        var nick = members[key].nick
+
+        if (nick !== null) {
+          server_scores[key] = {
+            nick: nick,
+            score: 0
+          }
+        }
+      }
+      leaderboard[serverID] = server_scores;
+      await fs.writeFileSync('leaderboard.json', JSON.stringify(leaderboard), 'utf8');
+    }
+
+    var msg = '---LeaderBoard---\n\n';
+    for (var userID in server_scores) {
+      msg += `**${server_scores[userID].nick}:** ${server_scores[userID].score}\n`
+    }
+
+    return msg;
   },
 
   get_body_parts: (channelID) => {
