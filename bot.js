@@ -165,7 +165,7 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
               bot.sendMessage({
                 to: channelID,
                 message: 'Here are the letters you have not guessed: ```' + letters + ' ```'
-              }, deletePrev);
+              });
             }
             break;
           /** STATE **/
@@ -189,7 +189,7 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
 
             } else {
 
-              var guesses = hangman.guess('?', channelID);
+              var guesses = await hangman.guess('?', channelID);
 
               bot.sendMessage({
                 to: channelID,
