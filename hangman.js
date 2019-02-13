@@ -24,26 +24,48 @@ var add_point = async (bot, serverID, userID) => {
   var leaderboard = await JSON.parse(fs.readFileSync('leaderboard.json', 'utf8'));
   var server_scores = leaderboard[serverID];
 
+  // if this server does not yet have a leaderboard initialized
   if (!server_scores) {
-    server_scores = {};
-    var members = bot.servers[serverID].members;
+    server_scores = init_leaderboard(bot, serverID);
+  }
 
-    for (var key in members) {
-      var nick = members[key].nick
+  // if the user is not in the leaderboard, get his info and add him
+  if (!server_scores[userID]) {
+    var user = bot.servers[serverID].members[userID];
+    var name = bot.users[userID].username;
 
-      if (nick !== null) {
-        server_scores[key] = {
-          nick: nick,
-          score: 0
-        }
-      }
+    server_scores[userID] = {
+      name: name,
+      nick: user.nick,
+      score: 0
     }
   }
+
   server_scores[userID].score = server_scores[userID].score + 1;
   leaderboard[serverID] = server_scores;
   await fs.writeFileSync('leaderboard.json', JSON.stringify(leaderboard), 'utf8');
   return true;
 };
+
+var init_leaderboard = (bot, serverID) => {
+  var server_scores = {};
+  var members = bot.servers[serverID].members;
+
+  for (var key in members) {
+    if (key !== '540642170101694464') {
+      var nick = members[key].nick
+      var name = bot.users[key].username;
+
+      server_scores[key] = {
+        name: name,
+        nick: nick,
+        score: 0
+      }
+    }
+  }
+
+  return server_scores;
+}
 
 var public = {
 
@@ -191,26 +213,16 @@ var public = {
     var server_scores = leaderboard[serverID];
 
     if (!server_scores) {
-      server_scores = {};
-      var members = bot.servers[serverID].members;
-      console.log(members);
-      for (var key in members) {
-        var nick = members[key].nick
-
-        if (nick !== null) {
-          server_scores[key] = {
-            nick: nick,
-            score: 0
-          }
-        }
-      }
+      server_scoers = init_leaderboard(bot, serverID);
+      console.log(server_scores);
       leaderboard[serverID] = server_scores;
       await fs.writeFileSync('leaderboard.json', JSON.stringify(leaderboard), 'utf8');
     }
 
     var msg = '---LeaderBoard---\n\n';
     for (var userID in server_scores) {
-      msg += `**${server_scores[userID].nick}:** ${server_scores[userID].score}\n`
+      var display_name = server_scores[userID].nick ? server_scores[userID].nick : server_scores[userID].name;
+      msg += `**${display_name}:** ${server_scores[userID].score}\n`
     }
 
     return msg;

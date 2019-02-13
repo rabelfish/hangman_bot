@@ -1,1 +1,81 @@
-{"1":{"234":{"nick":"bob","score":10},"34163":{"nick":"Rachel","score":3}},"388120547185131530":{"423565303574822923":{"nick":"Steven B","score":0},"423566987722227712":{"nick":"Dianna D","score":0},"472161712678633482":{"nick":"Rachel F","score":4},"472169852723789835":{"nick":"Stephaney K","score":0},"472171647710003220":{"nick":"Gonzalo I","score":0},"472172070038405131":{"nick":"James K","score":0},"487394588869263361":{"nick":"Jenn K","score":0}},"540641768526446592":{"104067637142650880":{"nick":"narroth","score":3},"153983024411836416":{"nick":"nick","score":0},"238454338647883776":{"nick":"rabecca","score":0},"241411339740774400":{"nick":"eric","score":0},"428265681792925697":{"nick":"holly","score":0},"472161712678633482":{"nick":"rachel","score":0}}}
+{
+  "1": {
+    "234": {
+      "nick": "bob",
+      "score": 10
+    },
+    "34163": {
+      "nick": "Rachel",
+      "score": 3
+    }
+  },
+  "540641768526446592": {
+    "104067637142650880": {
+      "name": "Narroth",
+      "nick": null,
+      "score": 0
+    },
+    "153983024411836416": {
+      "name": "TechnoWizard",
+      "nick": null,
+      "score": 0
+    },
+    "238454338647883776": {
+      "name": "Rabel",
+      "nick": "rabecca",
+      "score": 0
+    },
+    "241411339740774400": {
+      "name": "Eric",
+      "nick": null,
+      "score": 0
+    },
+    "428265681792925697": {
+      "name": "holly7green",
+      "nick": "holly",
+      "score": 0
+    },
+    "472161712678633482": {
+      "name": "rfisher",
+      "nick": null,
+      "score": 0
+    }
+  },
+  "388120547185131530": {
+    "423565303574822923": {
+      "name": "Steven",
+      "nick": "Steven B",
+      "score": 0
+    },
+    "423566987722227712": {
+      "name": "DIANNA",
+      "nick": "Dianna D",
+      "score": 1
+    },
+    "472169852723789835": {
+      "name": "StephK",
+      "nick": "Stephaney K",
+      "score": 0
+    },
+    "472171647710003220": {
+      "name": "gonZo",
+      "nick": "Gonzalo I",
+      "score": 0
+    },
+    "472172070038405131": {
+      "name": "JamesK",
+      "nick": "James K",
+      "score": 0
+    },
+    "487394588869263361": {
+      "name": "Jenn",
+      "nick": "Jenn K",
+      "score": 0
+    },
+    "472161712678633482": {
+      "name": "rfisher",
+      "nick": "Rachel F",
+      "score": 0
+    }
+  }
+}
