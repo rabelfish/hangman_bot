@@ -29,17 +29,19 @@ var add_point = async (bot, serverID, userID) => {
     server_scores = init_leaderboard(bot, serverID);
   }
 
+  var user = bot.servers[serverID].members[userID];
+  var name = bot.users[userID].username;
+
   // if the user is not in the leaderboard, get his info and add him
   if (!server_scores[userID]) {
-    var user = bot.servers[serverID].members[userID];
-    var name = bot.users[userID].username;
-
     server_scores[userID] = {
-      name: name,
-      nick: user.nick,
       score: 0
     }
   }
+
+  // update name and nickname in case they changed
+  server_scores[userID].name = name;
+  server_scores[userID].nick = user.nick;
 
   server_scores[userID].score = server_scores[userID].score + 1;
   leaderboard[serverID] = server_scores;
