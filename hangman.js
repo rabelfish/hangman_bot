@@ -71,8 +71,9 @@ var init_leaderboard = (bot, serverID) => {
 
 var public = {
 
-  init_word: (word, channelID) => {
+  init_word: (word, channelID, userID) => {
 
+    if (userID) delete game_data.pending_word_sets[userID];
     var word_state = "";
     var valid = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
     for (let i = 0; i < word.length; i++) {
@@ -115,7 +116,6 @@ var public = {
 
   get_pending_channel: (userID) => {
     var channelID = game_data.pending_word_sets[userID];
-    delete game_data.pending_word_sets[userID];
     return channelID;
   },
 

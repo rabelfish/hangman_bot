@@ -49,7 +49,7 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
 
         bot.sendMessage({
           to: userID,
-          message: 'Hi ' + user + '. It looks like you requested to set a word in hangman!\n\n Please reply to this message with the word you would like to set.\n\n \*\*Guessable characters include the english alphabet a-z. Case does not matter. All other UTF-8 characters are accepted but will not be hidden.'
+          message: 'Hi ' + user + '. It looks like you requested to set a word in hangman!\n\n Please reply to this message with the word you would like to set.\n\n \\*\\*Word must be 850 characters or less.  \n\n \\*\\*Guessable characters include the english alphabet a-z. Case does not matter. All other UTF-8 characters are accepted but will not be hidden.\n\n \\*\\*Word cannot start with !'
         });
       }
     } else {
@@ -206,25 +206,38 @@ bot.on('message', async function (user, userID, channelID, message, evt) {
   } else {
     var pendingID = hangman.get_pending_channel(userID);
 
+    var word = message.toUpperCase();
+
+console.log(pendingID);
+
     /** SET WORD **/
-    if (pendingID !== undefined) {
+    if (pendingID !== undefined && message.guild == undefined) {
 
-      var word = message.toUpperCase();
+      if (word.length > 850) {
 
-      hangman.init_word(word, pendingID);
+          bot.sendMessage({
+              to: channelID,
+              message: "Your word is too long. Please try a word that is 850 characters or less."
+          }, deletePrev);
+      } else {
+      	
+	hangman.init_word(word, pendingID, userID);
 
-      bot.sendMessage({
-        to: channelID,
-        message: 'Okay, the word is set as `' + word + '`'
-      });
+      	bot.sendMessage({
+        	to: channelID,
+        	message: 'Okay, the word is set as `' + word + '`'
+      	});
 
-      bot.sendMessage({
-        to: pendingID,
-        message: 'Letter Jail: ``` ' + hangman.get_letter_jail(pendingID) + ' ```' +
-          '\n\n```' + hangman.get_body_parts(pendingID) + ' ```' +
-          '\n\nHere\'s your word:\n```\n' + hangman.calc_word_state(pendingID) + '```' +
-          '\n\n>You have 10 guesses left. Guess a letter! Example: !E'
-      }, deletePrev);
+      	var to_send = 'Letter Jail: ``` ' + hangman.get_letter_jail(pendingID) + ' ```' +
+          	'\n\n```' + hangman.get_body_parts(pendingID) + ' ```' +
+          	'\n\nHere\'s your word:\n```\n' + hangman.calc_word_state(pendingID) + '```' +
+          	'\n\n>You have 10 guesses left. Guess a letter! Example: !E';
+
+      	bot.sendMessage({
+        	to: pendingID,
+        	message: to_send
+      	}, deletePrev);
+      }
     }
   }
 });
